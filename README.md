@@ -9,8 +9,8 @@ when you finish you can save your script to a file. it doesn't matter the file e
 The saved file is just a text file you can edit.
 
 # Actions
-these are the actions in the sequance file, you can edit, delete or insert commands.\
-command structure are like this : command name|param1|param2| ...
+these are the actions in the sequance file, you can edit, delete or insert actions.\
+action structure are like this : action name|param1|param2| ...
 
 delay the execution
 ```
