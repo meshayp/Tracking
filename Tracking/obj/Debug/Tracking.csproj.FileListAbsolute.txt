@@ -1,0 +1,11 @@
+C:\Temp\Tracking\Tracking\bin\Debug\Tracking.XML
+C:\Temp\Tracking\Tracking\bin\Debug\Tracking.exe
+C:\Temp\Tracking\Tracking\bin\Debug\Tracking.pdb
+C:\Temp\Tracking\Tracking\obj\Debug\ResolveAssemblyReference.cache
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.CountDownForm.resources
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.InRecordForm.resources
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.MainForm.resources
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.Properties.Resources.resources
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.csproj.GenerateResource.Cache
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.exe
+C:\Temp\Tracking\Tracking\obj\Debug\Tracking.pdb

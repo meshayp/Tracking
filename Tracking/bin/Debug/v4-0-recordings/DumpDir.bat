@@ -1,0 +1,1 @@
+dir C:\CC_Views\Tools\shayp_SW_Tools_2\SWTools\SoftwareUtilities\Tracking\Tracking\bin\Debug\v4-0-recordings >> out.txt
