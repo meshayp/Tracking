@@ -50,8 +50,7 @@ namespace Tracking
 			MouseHoocID = LowAPI.API_Functions.SetWindowsHookEx(
 				API_Conts.WH_MOUSE_LL,
 				MouseHoocDelegate,
-                Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]),
-                0);
+                Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]),0);
 
 			if (MouseHoocID == 0)
 			{
@@ -64,9 +63,7 @@ namespace Tracking
 			KeyboardHoocID = API_Functions.SetWindowsHookEx(
 					API_Conts.WH_KEYBOARD_LL,
 					KeyboradHoocDelegate,
-					Marshal.GetHINSTANCE(
-					Assembly.GetExecutingAssembly().GetModules()[0]),
-					0);
+					Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]),0);
 			if (KeyboardHoocID == 0)
 			{
 				int errorCode = Marshal.GetLastWin32Error();
@@ -74,7 +71,7 @@ namespace Tracking
 			}
 		}
 
-		private int MouseHoocFunction(int nCode, int wParam, IntPtr lParam)
+		private int MouseHoocFunction(int nCode, Int32 wParam, IntPtr lParam)
 		{
 			LowAPI.API_Structs.MouseLLHookStruct mouseHookStruct = (LowAPI.API_Structs.MouseLLHookStruct)Marshal.PtrToStructure(lParam, typeof(LowAPI.API_Structs.MouseLLHookStruct));
 
@@ -189,14 +186,14 @@ namespace Tracking
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			int retMouse = API_Functions.UnhookWindowsHookEx(MouseHoocID);
-			if (retMouse == 0)
-			{
-				int errorCode = Marshal.GetLastWin32Error();
-				throw new Win32Exception(errorCode);
-			}
+			int retMouse = API_Functions.UnhookWindowsHookEx(KeyboardHoocID);
+            if (retMouse == 0)
+            {
+                int errorCode = Marshal.GetLastWin32Error();
+                throw new Win32Exception(errorCode);
+            }
 
-			retMouse = API_Functions.UnhookWindowsHookEx(KeyboardHoocID);
+            retMouse = API_Functions.UnhookWindowsHookEx(MouseHoocID);
 			if (retMouse == 0)
 			{
 				int errorCode = Marshal.GetLastWin32Error();

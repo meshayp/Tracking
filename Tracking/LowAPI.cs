@@ -174,26 +174,40 @@ namespace LowAPI
 
 		public static string GetText(IntPtr hwnd)
 		{
-			int lngLength;
-			StringBuilder strBuffer = new StringBuilder();
-			int lngRet;
+			/*		int lngLength;
+					StringBuilder strBuffer = new StringBuilder();
+					int lngRet;
 
-			lngLength = SendMessage(hwnd, WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero) + 1;
+					lngLength = SendMessage(hwnd, WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero) + 1;
 
-			strBuffer.Capacity = lngLength;
+					strBuffer.Capacity = lngLength;
 
-			lngRet = SendMessageFaul(hwnd, WM_GETTEXT, strBuffer.Capacity, strBuffer);
-			if (lngRet > 0)
-				return strBuffer.ToString().Substring(0, lngRet);
-			return
-				null;
+					lngRet = SendMessageFaul(hwnd, WM_GETTEXT, strBuffer.Capacity, strBuffer);
+					if (lngRet > 0)
+						return strBuffer.ToString().Substring(0, lngRet);
+					return
+						null;*/
+
+			int textLen = LowAPI.API_Functions.GetWindowTextLength(hwnd);
+			StringBuilder winText = new StringBuilder(textLen + 1);
+			LowAPI.API_Functions.GetWindowText(hwnd, winText, textLen);
+
+			return  hwnd.ToString() + "  " + winText.ToString();
 		}
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+		public static extern int GetWindowTextLength(IntPtr window);
 
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
 		public static extern IntPtr WindowFromPoint(API_Structs.POINT Point);
 
-		[DllImport("user32.dll")]
+        [DllImport("user32.dll")]
+		public static extern IntPtr WindowFromPoint(int xPoint, int yPoint);
+
+        [DllImport("user32.dll")]
 		public static extern IntPtr SetCapture(IntPtr hWnd);
 
 		[DllImport("user32")]
@@ -288,14 +302,14 @@ namespace LowAPI
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetLastActivePopup(IntPtr window);
 
-		[DllImport("user32.dll")]
-		public static extern int GetWindowText(IntPtr window, [In][Out]StringBuilder text, int copyCount);
+/*		[DllImport("user32.dll")]
+		public static extern int GetWindowText(IntPtr window, [In][Out]StringBuilder text, int copyCount);*/
 
 		[DllImport("user32.dll")]
 		public static extern bool SetWindowText(IntPtr window, [MarshalAs(UnmanagedType.LPTStr)]string text);
 
-		[DllImport("user32.dll")]
-		public static extern int GetWindowTextLength(IntPtr window);
+/*		[DllImport("user32.dll")]
+		public static extern int GetWindowTextLength(IntPtr window);*/
 
 		[DllImport("user32.dll")]
 		public static extern int SetWindowLong(IntPtr window, int index, int value);

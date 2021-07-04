@@ -94,12 +94,14 @@ namespace Tracking
 				ColorB = color.B;
 				textBox3.Text = "(R,G,B)=(" + ColorR + "," + ColorG + "," + ColorG + ")" + "     (X,Y)=("+MouseXPos+","+MouseYPos+")";
 				textBox3.Update();
+				colorPanel.BackColor = color;
+				colorPanel.Update();
 
 				LowAPI.API_Structs.POINT pt = new LowAPI.API_Structs.POINT();
-				pt.x = 100;
-				pt.y = 100;
+				pt.x = e.X + this.Left + 4;
+				pt.y = e.Y + this.Top + 29;
 				IntPtr wnd = IntPtr.Zero;
-				wnd = LowAPI.API_Functions.WindowFromPoint(pt);
+				wnd = LowAPI.API_Functions.WindowFromPoint(pt.x, pt.y);
 				if (wnd != IntPtr.Zero)
 				{
 					string str = LowAPI.API_Functions.GetText(wnd);
