@@ -286,9 +286,9 @@ namespace Tracking
 		private System.Windows.Forms.TextBox textBox7;
 		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 		private System.Windows.Forms.Button button7;
-		private System.Windows.Forms.Label label1;
-		public System.Windows.Forms.SaveFileDialog saveFileDialog1;
+		public System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.LinkLabel linkLabel1;
+		public System.Windows.Forms.SaveFileDialog saveFileDialog1;
 	}
 }

@@ -13,14 +13,37 @@ using System.IO;
 
 namespace Actions
 {
+
+    public class MouseEvent
+    {
+        public int nCode;
+        public int wParam;
+        public int mouseData;
+        public int x;
+        public int y;
+        public int flags;
+        public int dwExtraInfo;
+    };
+
+    public class KeyboardEvent
+    {
+        public int nCode;
+        public int wParam;
+        public int scanCode;
+        public int vkCode;
+        public int time;
+        public int flags;
+        public int dwExtraInfo;
+    };
+
     public class Globals
     {
-        public static bool Play;
-        public static bool Record;
+        /*public static bool Play;
+        public static bool Record;*/
 
         public static string Seperator = "|";
 
-		public static ManualResetEvent Pause = new ManualResetEvent(true);
+		
 
         public static int ScreenWidth = 0;
         public static int ScreenHeight = 0;
@@ -138,9 +161,11 @@ namespace Actions
 
     public class ActionsManager
     {
-        public List<Action> Items;
+		public ManualResetEvent Pause = new ManualResetEvent(true);
+		public List<Action> Items;
         ActionsFactory actionsFactory;
-		static public Label ActionLabel = null;
+		public Label ActionLabel = null;
+		public EngineStatus eStatus;
 
         public ActionsManager()
         {
@@ -175,9 +200,9 @@ namespace Actions
 
         public int Execute()
         {
-            for (int i = 0; ((i < Items.Count)&&(Globals.Play)); i++)
+            for (int i = 0; ((i < Items.Count)&&(eStatus.playing)); i++)
             {
-				Globals.Pause.WaitOne();
+				Pause.WaitOne();
 
 				if (ActionLabel != null)
 				{
@@ -198,18 +223,40 @@ namespace Actions
         int Execute();
         String ToString();
         Action NewInstance();
+		void setStatus(EngineStatus eStatus);
     }
 
-    public class DelayAction : Action
+	public abstract class ActionBase : Action
     {
-        public String GetName()
+        protected EngineStatus eStatus;
+
+        public abstract int Execute();
+        public abstract string GetName();
+        public abstract Action NewInstance();
+        public abstract int Parse(string[] args);
+
+        void setStatus(EngineStatus eStatus)
+        {
+			this.eStatus = eStatus;
+
+		}
+
+        void Action.setStatus(EngineStatus eStatus)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DelayAction : ActionBase
+	{
+        public override String GetName()
         {
             return "Delay";
         }
 
         public long milisecs;
 
-        public int Parse(String[] args)
+        public override int Parse(String[] args)
         {
             //milisecs = long.Parse(  Variables.GetString(args[1]) );
 			//milisecs -= 75;
@@ -219,7 +266,7 @@ namespace Actions
             return 0;
         }
 
-        public int Execute()
+        public override int Execute()
         {
 			milisecs -= 10;
 			if (milisecs > 0)
@@ -233,32 +280,33 @@ namespace Actions
             return GetName() + Globals.Seperator + milisecs.ToString();
         }
 
-        public Action NewInstance()
+        public override Action NewInstance()
         {
             return new DelayAction();
         }
     }
 
-    public class RunActionFileAction : Action
-    {
-        public String GetName()
+    public class RunActionFileAction : ActionBase
+	{
+        public override String GetName()
         {
             return "RunActionFile";
         }
 
         String FileName;
 
-        public int Parse(String[] args)
+        public override int Parse(String[] args)
         {
             FileName = Variables.GetString(args[1]);
 
             return 0;
         }
 
-        public int Execute()
+        public override int Execute()
         {
             ActionsManager actionsManager = new ActionsManager();
-            actionsManager.ReadFromFile(Variables.GetString(FileName));
+			actionsManager.eStatus = this.eStatus;
+			actionsManager.ReadFromFile(Variables.GetString(FileName));
             actionsManager.Execute();
             return 0;
         }
@@ -268,15 +316,15 @@ namespace Actions
             return GetName() + Globals.Seperator + FileName;
         }
 
-        public Action NewInstance()
+        public override Action NewInstance()
         {
             return new RunActionFileAction();
         }
     }
 
-    public class IncreaceNumberAction : Action
-    {
-        public String GetName()
+    public class IncreaceNumberAction : ActionBase
+	{
+        public override String GetName()
         {
             return "AddNumber";
         }
@@ -285,7 +333,7 @@ namespace Actions
         String number;
 		long TempNumber;
 
-        public int Parse(String[] args)
+        public override int Parse(String[] args)
         {
             VarName = args[1];
             //number = int.Parse( Variables.GetString(args[2]));
@@ -294,7 +342,7 @@ namespace Actions
             return 0;
         }
 
-        public int Execute()
+        public override int Execute()
         {
             int ret = 0;
             try
@@ -315,15 +363,15 @@ namespace Actions
             return GetName() + Globals.Seperator + VarName + Globals.Seperator + number;
         }
 
-        public Action NewInstance()
+        public override Action NewInstance()
         {
 			return new IncreaceNumberAction();
         }
     }
 
-    public class AssignVarAction : Action
-    {
-        public String GetName()
+    public class AssignVarAction : ActionBase
+	{
+        public override String GetName()
         {
             return "AssignVar";
         }
@@ -332,7 +380,7 @@ namespace Actions
         String Value;
 		String TempVal;
 
-        public int Parse(String[] args)
+        public override int Parse(String[] args)
         {
             VarName = args[1];
             //Value = Variables.GetString(args[2]);
@@ -341,7 +389,7 @@ namespace Actions
             return 0;
         }
 
-        public int Execute()
+        public override int Execute()
         {
 			TempVal = Variables.GetString(Value);
             Variables.Set(VarName, TempVal);
@@ -354,15 +402,15 @@ namespace Actions
             return GetName() + Globals.Seperator + VarName + Globals.Seperator + Value;
         }
 
-        public Action NewInstance()
+        public override Action NewInstance()
         {
             return new AssignVarAction();
         }
     }
 
-    public class ReadRegistryAction : Action
-    {
-        public String GetName()
+    public class ReadRegistryAction : ActionBase
+	{
+        public override String GetName()
         {
             return "ReadRegistry";
         }
@@ -374,7 +422,7 @@ namespace Actions
 		String TempRegistryPath;
 		String TempValueName;
 
-        public int Parse(String[] args)
+        public override int Parse(String[] args)
         {
             VarName = args[1];
             //RegistryPath = Variables.GetString(args[2]);
@@ -385,7 +433,7 @@ namespace Actions
             return 0;
         }
 
-        public int Execute()
+        public override int Execute()
         {
 			TempRegistryPath = Variables.GetString(RegistryPath);
 			TempValueName = Variables.GetString(ValueName);
@@ -401,15 +449,15 @@ namespace Actions
             return GetName() + Globals.Seperator + VarName + Globals.Seperator + RegistryPath + Globals.Seperator + ValueName;
         }
 
-        public Action NewInstance()
+        public override Action NewInstance()
         {
             return new ReadRegistryAction();
         }
     }
 
-	public class WriteRegistryAction : Action
+	public class WriteRegistryAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "WriteRegistry";
 		}
@@ -421,7 +469,7 @@ namespace Actions
 		String TempRegistryPath;
 		String TempValueName;
 
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			VarName = args[1];
 			//RegistryPath = Variables.GetString(args[2]);
@@ -433,7 +481,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			TempRegistryPath = Variables.GetString(RegistryPath);
 			TempValueName = Variables.GetString(ValueName);
@@ -448,24 +496,24 @@ namespace Actions
 			return GetName() + Globals.Seperator + VarName + Globals.Seperator + RegistryPath + Globals.Seperator + ValueName;
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new WriteRegistryAction();
 		}
 	}
 
-	public class MouseAction : Action
+	public class MouseAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "Mouse";
 		}
 
-		Tracking.MouseEvent mouseEvent;
+		MouseEvent mouseEvent;
 
 		public void SetMouseActionData(int nCode, int wParam, LowAPI.API_Structs.MouseLLHookStruct DataStruct)
 		{
-			mouseEvent = new Tracking.MouseEvent();
+			mouseEvent = new MouseEvent();
 
 			mouseEvent.dwExtraInfo = DataStruct.dwExtraInfo;
 			mouseEvent.flags = LowAPI.API_Conts.MOUSEEVENTF_ABSOLUTE;
@@ -484,9 +532,9 @@ namespace Actions
 			mouseEvent.y = DataStruct.pt.y; // *(int)(65600 / 1024);
 		}
 	
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
-			mouseEvent = new Tracking.MouseEvent();
+			mouseEvent = new MouseEvent();
 
 			mouseEvent.dwExtraInfo = int.Parse(args[1]);
 			mouseEvent.flags = int.Parse(args[2]);
@@ -500,7 +548,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			LowAPI.API_Structs.MOUSEINPUT input = new LowAPI.API_Structs.MOUSEINPUT();
 			input.type = 0;
@@ -529,24 +577,24 @@ namespace Actions
 			mouseEvent.y.ToString();
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new MouseAction();
 		}
 	}
 
-	public class KeyboardAction : Action
+	public class KeyboardAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "Keyboard";
 		}
 
-		Tracking.KeyboardEvent keyboardEvent;
+		KeyboardEvent keyboardEvent;
 
 		public void SetKeyboardActionData(int nCode, int wParam, LowAPI.API_Structs.KeyboardHookStruct DataStruct)
 		{
-			keyboardEvent = new Tracking.KeyboardEvent();
+			keyboardEvent = new KeyboardEvent();
 
 			keyboardEvent.dwExtraInfo = DataStruct.dwExtraInfo;
 
@@ -561,9 +609,9 @@ namespace Actions
 			keyboardEvent.wParam = wParam;
 		}
 		
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
-			keyboardEvent = new Tracking.KeyboardEvent();
+			keyboardEvent = new KeyboardEvent();
 
 			keyboardEvent.dwExtraInfo = int.Parse(args[1]);
 			keyboardEvent.flags = int.Parse(args[2]);
@@ -575,7 +623,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			LowAPI.API_Structs.KEYBDINPUT input = new LowAPI.API_Structs.KEYBDINPUT();
 			input.type = 1;
@@ -602,15 +650,15 @@ namespace Actions
 			keyboardEvent.wParam.ToString();
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new KeyboardAction();
 		}
 	}
 
-	public class WaitWhileColorAction : Action
+	public class WaitWhileColorAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "WaitWhileColor";
 		}
@@ -621,7 +669,7 @@ namespace Actions
 		public int G;
 		public int B;
 		
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			x = int.Parse(args[1]);
 			y = int.Parse(args[2]);
@@ -632,7 +680,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			Color TestColor = LowAPI.API_Functions.GetPixelColor(x, y);
 			while ((TestColor.R == R) && (TestColor.G == G) && (TestColor.B == B))
@@ -654,15 +702,15 @@ namespace Actions
 			B.ToString();
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new WaitWhileColorAction();
 		}
 	}
 
-	public class WaitForColorAction : Action
+	public class WaitForColorAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "WaitForColor";
 		}
@@ -673,7 +721,7 @@ namespace Actions
 		public int G;
 		public int B;
 		
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			x = int.Parse(args[1]);
 			y = int.Parse(args[2]);
@@ -684,7 +732,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			Color TestColor = LowAPI.API_Functions.GetPixelColor(x, y);
 			while ((TestColor.R != R) && (TestColor.G != G) && (TestColor.B != B))
@@ -706,7 +754,7 @@ namespace Actions
 			B.ToString();
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new WaitForColorAction();
 		}
@@ -715,23 +763,23 @@ namespace Actions
 	
 
 	
-	public class KeyboardStringAction : Action
+	public class KeyboardStringAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "KeyboardString";
 		}
 
 		String str;
 		
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			str = args[1];
 
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			String InputString = Variables.GetString(str);
 
@@ -762,15 +810,15 @@ namespace Actions
 			return GetName() + Globals.Seperator + str;
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new KeyboardStringAction();
 		}
 	}
 
-	public class ShowMessageAction : Action
+	public class ShowMessageAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "ShowMessage";
 		}
@@ -778,7 +826,7 @@ namespace Actions
 		public String Title;
 		public String Content;
 
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			Title = args[1];
 			Content = args[2];
@@ -786,7 +834,7 @@ namespace Actions
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			MessageBox.Show(Variables.GetString(Content), Variables.GetString(Title));
 
@@ -798,29 +846,29 @@ namespace Actions
 			return GetName() + Globals.Seperator + Title + Globals.Seperator + Content;
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new ShowMessageAction();
 		}
 	}
 
-	public class RunDirectoryAction : Action
+	public class RunDirectoryAction : ActionBase
 	{
-		public String GetName()
+		public override String GetName()
 		{
 			return "RunDirectory";
 		}
 
 		public String Dir;
 
-		public int Parse(String[] args)
+		public override int Parse(String[] args)
 		{
 			Dir = args[1];
 
 			return 0;
 		}
 
-		public int Execute()
+		public override int Execute()
 		{
 			if ( Dir[Dir.Length-1] != '\\')
 			{
@@ -828,6 +876,7 @@ namespace Actions
 			}
 			String[] files = Directory.GetFiles(Variables.GetString(Dir));
 			ActionsManager actionManager = new ActionsManager();
+			actionManager.eStatus = this.eStatus;
 			for (int i = 0; i < files.Length; i++ )
 			{
 				actionManager.ReadFromFile(files[i]);
@@ -842,7 +891,7 @@ namespace Actions
 			return GetName() + Globals.Seperator + Dir;
 		}
 
-		public Action NewInstance()
+		public override Action NewInstance()
 		{
 			return new RunDirectoryAction();
 		}

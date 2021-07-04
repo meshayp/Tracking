@@ -11,8 +11,7 @@ using System.IO;
 namespace Tracking
 {
 	public partial class InRecordForm : Form
-	{
-		public MainForm Parent;
+	{ 
 
 		/*public InRecordForm(MainForm parent)
 		{
@@ -39,7 +38,8 @@ namespace Tracking
 			ShowMessageAction message = new ShowMessageAction();
 			message.Title = textBox1.Text;
 			message.Content = textBox2.Text;
-			Parent.UserEvents.Items.Add(message);
+			//Parent.UserEvents.Items.Add(message);
+			engine.UserEvents.Items.Add(message);
 		}
 
 		private void button4_Click(object sender, EventArgs e)
@@ -53,11 +53,11 @@ namespace Tracking
 				counter++;
 			}
 
-			Parent.saveFileDialog1.FileName = FileName;
-			if (Parent.saveFileDialog1.ShowDialog() == DialogResult.OK)
+			this.saveFileDialog1.FileName = FileName;
+			if (this.saveFileDialog1.ShowDialog() == DialogResult.OK)
 			{
-				Parent.UserEvents.WriteToFile(Parent.saveFileDialog1.FileName);
-				Parent.UserEvents.Items.Clear();
+				engine.UserEvents.WriteToFile(this.saveFileDialog1.FileName);
+				engine.UserEvents.Items.Clear();
 			}
 		}
 
@@ -68,7 +68,9 @@ namespace Tracking
 		Byte ColorG;
 		Byte ColorB;
 
-		private void InRecordForm_MouseDown(object sender, MouseEventArgs e)
+        internal TrackingEngine engine { get; set; }
+
+        private void InRecordForm_MouseDown(object sender, MouseEventArgs e)
 		{
 			LowAPI.API_Functions.SetCapture(this.Handle);
 			Cursor = Cursors.Hand;
@@ -120,7 +122,7 @@ namespace Tracking
 			ForColor.G = ColorG;
 			ForColor.B = ColorB;
 
-			Parent.UserEvents.Items.Add(ForColor);
+			engine.UserEvents.Items.Add(ForColor);
 
 		}
 
@@ -134,7 +136,7 @@ namespace Tracking
 			WhileColor.G = ColorG;
 			WhileColor.B = ColorB;
 
-			Parent.UserEvents.Items.Add(WhileColor);
+			engine.UserEvents.Items.Add(WhileColor);
 		}
 
 		private void InRecordForm_FormClosing(object sender, FormClosingEventArgs e)

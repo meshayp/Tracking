@@ -356,7 +356,7 @@ namespace Tracking
 
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Label label1;
+		public System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.TextBox textBox1;
 		private System.Windows.Forms.Button button3;
@@ -377,5 +377,6 @@ namespace Tracking
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Panel colorPanel;
+        public System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }
