@@ -508,8 +508,8 @@ namespace Actions
 			input.mouseData = (uint)mouseEvent.mouseData;
 			input.time = 0;
 			input.dwExtraInfo = IntPtr.Zero;
-            input.dx = mouseEvent.x * (int)(65600 / Globals.ScreenWidth);
-            input.dy = mouseEvent.y * (int)(65600 / Globals.ScreenHeight);
+			input.dx =  (int) (65536.0 / Globals.ScreenWidth * mouseEvent.x); //* (int)(65600 / Globals.ScreenWidth);
+			input.dy = (int) (65536.0 / Globals.ScreenHeight * mouseEvent.y); //* (int)(65600 / Globals.ScreenHeight);
 
 			LowAPI.API_Functions.mouse_event(mouseEvent.flags, input.dx, input.dy, mouseEvent.wParam, 0);
 
