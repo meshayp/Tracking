@@ -86,7 +86,7 @@ namespace Tracking
 							mouseHookStruct.flags + "," +
 							mouseHookStruct.dwExtraInfo;
 
-			if (Globals.Record)
+			if (Globals.Record )
 			{
 				//UserEvents.AddDelayEvent();
 				//UserEvents.AddMouseEvent(nCode, wParam, mouseHookStruct);
