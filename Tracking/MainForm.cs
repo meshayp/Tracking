@@ -14,7 +14,10 @@ using Actions;
 
 namespace Tracking
 {
-	public partial class MainForm : Form
+
+    
+
+    public partial class MainForm : Form
 	{
 		//String LabelText;
 
@@ -33,19 +36,10 @@ namespace Tracking
 		public MainForm()
 		{
 			InitializeComponent();
-			//UserEvents = new Events();
 
-			engine.RecordForm = new InRecordForm();
-			engine.textBox1 = textBox1;
-			//InRecordForm RecordForm = new InRecordForm();
+			engine.Init(new FormBase(this));
 
-			engine.UserEvents = new ActionsManager();
-			engine.UserEvents.eStatus = engine.eStatus;
-			engine.UserEvents.ActionLabel = label1;
-			engine.self = this;
-			//engine.RecordForm.Parent = this;
-			engine.RecordForm.engine = engine;
-		}
+        }
 
         
 
@@ -72,7 +66,6 @@ namespace Tracking
 			CountDownForm countdown = new CountDownForm();
 			countdown.DoCountDown(5);
 
-			
 			this.Enabled = false;
 			
 			engine.startRecord();

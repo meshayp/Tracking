@@ -164,14 +164,18 @@ namespace Actions
 		public ManualResetEvent Pause = new ManualResetEvent(true);
 		public List<Action> Items;
         ActionsFactory actionsFactory;
-		public Label ActionLabel = null;
+		//public Label ActionLabel = null;
 		public EngineStatus eStatus;
+        private FormBase formBase;
 
-        public ActionsManager()
-        {
+        public ActionsManager(EngineStatus eStatus, FormBase formBase)
+		{
             Items = new List<Action>();
             actionsFactory = new ActionsFactory();
-        }
+			this.eStatus = eStatus;
+			this.formBase = formBase;
+
+		}
 
         public void WriteToFile(String FileName)
         {
@@ -192,7 +196,10 @@ namespace Actions
 			do
 			{
 				newLine = file.ReadLine();
-				Items.Add(actionsFactory.ParseLine(newLine));
+                Action parseAction = actionsFactory.ParseLine(newLine);
+				parseAction.setStatus(this.eStatus);
+				parseAction.setForm(this.formBase);
+				Items.Add(parseAction);
 			}
 			while (!file.EndOfStream);
             file.Close();
@@ -204,12 +211,10 @@ namespace Actions
             {
 				Pause.WaitOne();
 
-				if (ActionLabel != null)
-				{
-					ActionLabel.Text = Items[i].ToString();
-					Application.DoEvents();
-				}
-                Items[i].Execute();
+				this.formBase.setActionLabelText(Items[i].ToString());
+
+				Application.DoEvents();
+				Items[i].Execute();
             }
 
             return 0;
@@ -224,28 +229,30 @@ namespace Actions
         String ToString();
         Action NewInstance();
 		void setStatus(EngineStatus eStatus);
-    }
+		void setForm(FormBase form);
+	}
 
 	public abstract class ActionBase : Action
     {
         protected EngineStatus eStatus;
+		protected FormBase formBase;
 
-        public abstract int Execute();
+		public abstract int Execute();
         public abstract string GetName();
         public abstract Action NewInstance();
         public abstract int Parse(string[] args);
 
-        void setStatus(EngineStatus eStatus)
+
+        public void setStatus(EngineStatus eStatus)
         {
 			this.eStatus = eStatus;
-
 		}
 
-        void Action.setStatus(EngineStatus eStatus)
+		public void setForm(FormBase form)
         {
-            throw new NotImplementedException();
+			this.formBase = form;
         }
-    }
+	}
 
     public class DelayAction : ActionBase
 	{
@@ -268,9 +275,9 @@ namespace Actions
 
         public override int Execute()
         {
-			milisecs -= 10;
+			//milisecs -= 10;
 			if (milisecs > 0)
-				Thread.Sleep((int)milisecs*2);
+				Thread.Sleep((int)milisecs);
 
             return 0;
         }
@@ -304,8 +311,7 @@ namespace Actions
 
         public override int Execute()
         {
-            ActionsManager actionsManager = new ActionsManager();
-			actionsManager.eStatus = this.eStatus;
+            ActionsManager actionsManager = new ActionsManager(this.eStatus, this.formBase);
 			actionsManager.ReadFromFile(Variables.GetString(FileName));
             actionsManager.Execute();
             return 0;
@@ -875,8 +881,7 @@ namespace Actions
 				Dir += '\\';
 			}
 			String[] files = Directory.GetFiles(Variables.GetString(Dir));
-			ActionsManager actionManager = new ActionsManager();
-			actionManager.eStatus = this.eStatus;
+			ActionsManager actionManager = new ActionsManager(this.eStatus, this.formBase);
 			for (int i = 0; i < files.Length; i++ )
 			{
 				actionManager.ReadFromFile(files[i]);

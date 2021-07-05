@@ -17,33 +17,34 @@ namespace Tracking
     {
 		public EngineStatus eStatus = new EngineStatus();
 
-		/*public void play(bool status)
-        {
-			eStatus.play();
-        }
-
-        public void record(bool status)
-        {
-			eStatus.record();
-        }*/
-
         LowAPI.API_Functions.HookProc MouseHoocDelegate;
         int MouseHoocID;
         LowAPI.API_Functions.HookProc KeyboradHoocDelegate;
         int KeyboardHoocID;
 
         public InRecordForm RecordForm { get; set; }
-        public System.Windows.Forms.TextBox textBox1 { get; set; }
+        //public System.Windows.Forms.TextBox textBox1 { get; set; }
         public ActionsManager UserEvents { get; set; }
-        public MainForm self { get; set; }
+		//public MainForm self { get; set; }
+		public FormBase self { get; set; }
+
+        public void Init(FormBase formBase)
+        {
+			this.self = formBase;
+
+			this.RecordForm = new InRecordForm();
+			this.RecordForm.engine = this;
+
+			this.UserEvents = new ActionsManager(this.eStatus, this.self);
+
+        }
 
         public void onLoad()
         {
             this.RecordForm = new InRecordForm();
 			this.RecordForm.engine = this;
 
-            UserEvents = new ActionsManager();
-			UserEvents.eStatus = this.eStatus;
+			UserEvents = new ActionsManager(this.eStatus, this.self);
 
 			Globals.CalcScreenBounds();
 
@@ -110,16 +111,13 @@ namespace Tracking
 		{
 			LowAPI.API_Structs.MouseLLHookStruct mouseHookStruct = (LowAPI.API_Structs.MouseLLHookStruct)Marshal.PtrToStructure(lParam, typeof(LowAPI.API_Structs.MouseLLHookStruct));
 
-			if (textBox1 != null)
-			{
-				textBox1.Text = nCode + "," +
+			self.setTextboxText(nCode + "," +
 								wParam + "," +
 								mouseHookStruct.mouseData + "," +
 								mouseHookStruct.pt.x + "," +
 								mouseHookStruct.pt.y + "," +
 								mouseHookStruct.flags + "," +
-								mouseHookStruct.dwExtraInfo;
-			}
+								mouseHookStruct.dwExtraInfo);
 
 			if (eStatus.recording)
 			{
@@ -133,13 +131,20 @@ namespace Tracking
 				MouseAction mouseAction = new MouseAction();
 				mouseAction.SetMouseActionData(nCode, wParam, mouseHookStruct);
 				UserEvents.Items.Add(mouseAction);
-			}
+
+				self.setTextboxText(nCode + "," +
+								wParam + "," +
+								mouseHookStruct.mouseData + "," +
+								mouseHookStruct.pt.x + "," +
+								mouseHookStruct.pt.y + "," +
+								mouseHookStruct.flags + "," +
+								mouseHookStruct.dwExtraInfo + ", " +
+								Delay.milisecs);
+            }
 
 			return API_Functions.CallNextHookEx(MouseHoocID, nCode, wParam, lParam);
 		}
 
-
-		delegate DialogResult ShowInRecordDialogDelegate();
 
 		public DialogResult ShowInRecordDialog()
 		{
@@ -151,24 +156,21 @@ namespace Tracking
 		{
 			LowAPI.API_Structs.KeyboardHookStruct keyboardHookStruct = (LowAPI.API_Structs.KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(LowAPI.API_Structs.KeyboardHookStruct));
 
-			if (textBox1 != null)
-			{
-				textBox1.Text = nCode + "," +
-								wParam + "," +
-								keyboardHookStruct.scanCode + "," +
-								keyboardHookStruct.vkCode + "," +
-								keyboardHookStruct.time + "," +
-								keyboardHookStruct.flags + "," +
-								keyboardHookStruct.dwExtraInfo;
-			}
+            self.setTextboxText(nCode + "," +
+                            wParam + "," +
+                            keyboardHookStruct.scanCode + "," +
+                            keyboardHookStruct.vkCode + "," +
+                            keyboardHookStruct.time + "," +
+                            keyboardHookStruct.flags + "," +
+                            keyboardHookStruct.dwExtraInfo );
 
-			if (eStatus.playing)
+            if (eStatus.playing)
 			{
 				if (keyboardHookStruct.scanCode == 69)
 				{
 
+					eStatus.stop();
 					UserEvents.Pause.Reset();
-					eStatus.stop(); 
 					if (MessageBox.Show("Play paused, continue ?", "Tracking message", MessageBoxButtons.YesNo) == DialogResult.Yes)
 					{
 						eStatus.play(); 
@@ -186,8 +188,8 @@ namespace Tracking
 					DialogResult Ret = (DialogResult)self.Invoke(new ShowInRecordDialogDelegate(ShowInRecordDialog));
 					if (Ret == DialogResult.Cancel)
 					{
-						self.Enabled = true;
-						self.label1.Text = "";
+						self.enableDisplay();
+						self.setLabelText("");
 					}
 					if (Ret == DialogResult.Retry)
 					{
@@ -211,7 +213,17 @@ namespace Tracking
 				KeyboardAction keyboardAction = new KeyboardAction();
 				keyboardAction.SetKeyboardActionData(nCode, wParam, keyboardHookStruct);
 				UserEvents.Items.Add(keyboardAction);
-			}
+
+
+				self.setTextboxText(nCode + "," +
+									wParam + "," +
+									keyboardHookStruct.scanCode + "," +
+									keyboardHookStruct.vkCode + "," +
+									keyboardHookStruct.time + "," +
+									keyboardHookStruct.flags + "," +
+									keyboardHookStruct.dwExtraInfo +
+									Delay.milisecs);
+            }
 
 			return API_Functions.CallNextHookEx(KeyboardHoocID, nCode, wParam, lParam);
 		}
