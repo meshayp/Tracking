@@ -17,7 +17,7 @@ namespace Tracking
 
     
 
-    public partial class MainForm : Form
+    public partial class MainForm : Form, ITrackingForm
 	{
 		//String LabelText;
 
@@ -37,7 +37,7 @@ namespace Tracking
 		{
 			InitializeComponent();
 
-			engine.Init(new FormBase(this));
+			engine.Init(this);
 
         }
 
@@ -63,8 +63,11 @@ namespace Tracking
 		{
 			label1.Text = "";
 			textBox7.Text = "";
-			CountDownForm countdown = new CountDownForm();
-			countdown.DoCountDown(5);
+			if (checkBox1.Checked)
+			{
+				CountDownForm countdown = new CountDownForm();
+				countdown.DoCountDown(5);
+			}
 
 			this.Enabled = false;
 			
@@ -168,7 +171,43 @@ namespace Tracking
 		{
 			System.Diagnostics.Process.Start("Mailto:shay.peduim@gmail.com?subject=About tracking system");
 		}
-	}
+
+        public void enableDisplay()
+        {
+			this.Enabled = true;
+		}
+
+        public void disableDisplay()
+        {
+			this.Enabled = false;
+		}
+
+        public DialogResult InvokeDelegate(ShowInRecordDialogDelegate showInRecordDialogDelegate)
+        {
+			return (DialogResult)this.Invoke(showInRecordDialogDelegate);
+		}
+
+        public void setLabelText(string v)
+        {
+			this.Text = v;
+		}
+
+        public void setTextboxText(string v)
+        {
+			if (this.textBox1 != null)
+            {
+				this.textBox1.Text = v;
+            }
+        }
+
+        public void setActionLabelText(string v)
+        {
+			if (this.label1 != null)
+            {
+				this.label1.Text = v;
+            }
+        }
+    }
 
 	
 

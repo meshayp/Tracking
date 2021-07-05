@@ -26,9 +26,9 @@ namespace Tracking
         //public System.Windows.Forms.TextBox textBox1 { get; set; }
         public ActionsManager UserEvents { get; set; }
 		//public MainForm self { get; set; }
-		public FormBase self { get; set; }
+		public ITrackingForm self { get; set; }
 
-        public void Init(FormBase formBase)
+        public void Init(ITrackingForm formBase)
         {
 			this.self = formBase;
 
@@ -148,7 +148,12 @@ namespace Tracking
 
 		public DialogResult ShowInRecordDialog()
 		{
-			return RecordForm.ShowDialog();
+			RecordForm.TopMost = true;
+			RecordForm.TopLevel = true;
+			DialogResult dialogResult = RecordForm.ShowDialog();
+			RecordForm.BringToFront();
+
+			return dialogResult;
 		}
 
 
@@ -171,7 +176,7 @@ namespace Tracking
 
 					eStatus.stop();
 					UserEvents.Pause.Reset();
-					if (MessageBox.Show("Play paused, continue ?", "Tracking message", MessageBoxButtons.YesNo) == DialogResult.Yes)
+					if (MessageBox.Show(new Form { TopMost = true }, "Play paused, continue ?", "Tracking message", MessageBoxButtons.YesNo) == DialogResult.Yes)
 					{
 						eStatus.play(); 
 					}
@@ -185,7 +190,7 @@ namespace Tracking
 				if (keyboardHookStruct.scanCode == 69)
 				{
 					eStatus.stop();
-					DialogResult Ret = (DialogResult)self.Invoke(new ShowInRecordDialogDelegate(ShowInRecordDialog));
+					DialogResult Ret = (DialogResult)self.InvokeDelegate(new ShowInRecordDialogDelegate(ShowInRecordDialog));
 					if (Ret == DialogResult.Cancel)
 					{
 						self.enableDisplay();

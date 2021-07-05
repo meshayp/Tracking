@@ -7,7 +7,19 @@ using System.Windows.Forms;
 
 namespace Tracking
 {
-    public class FormBase
+    public delegate DialogResult ShowInRecordDialogDelegate();
+
+    public interface ITrackingForm
+    {
+        void enableDisplay();
+        void disableDisplay();
+        DialogResult InvokeDelegate(ShowInRecordDialogDelegate showInRecordDialogDelegate);
+        void setLabelText(string v);
+        void setTextboxText(string v);
+        void setActionLabelText(string v);
+    }
+
+    /*public class FormBase
     {
         private MainForm mainForm;
 
@@ -50,7 +62,6 @@ namespace Tracking
                 mainForm.label1.Text = v;
             }
         }
-    }
+    }*/
 
-    delegate DialogResult ShowInRecordDialogDelegate();
 }

@@ -166,9 +166,9 @@ namespace Actions
         ActionsFactory actionsFactory;
 		//public Label ActionLabel = null;
 		public EngineStatus eStatus;
-        private FormBase formBase;
+        private ITrackingForm formBase;
 
-        public ActionsManager(EngineStatus eStatus, FormBase formBase)
+        public ActionsManager(EngineStatus eStatus, ITrackingForm formBase)
 		{
             Items = new List<Action>();
             actionsFactory = new ActionsFactory();
@@ -229,13 +229,13 @@ namespace Actions
         String ToString();
         Action NewInstance();
 		void setStatus(EngineStatus eStatus);
-		void setForm(FormBase form);
+		void setForm(ITrackingForm form);
 	}
 
 	public abstract class ActionBase : Action
     {
         protected EngineStatus eStatus;
-		protected FormBase formBase;
+		protected ITrackingForm formBase;
 
 		public abstract int Execute();
         public abstract string GetName();
@@ -248,7 +248,7 @@ namespace Actions
 			this.eStatus = eStatus;
 		}
 
-		public void setForm(FormBase form)
+		public void setForm(ITrackingForm form)
         {
 			this.formBase = form;
         }
@@ -276,7 +276,7 @@ namespace Actions
         public override int Execute()
         {
 			//milisecs -= 10;
-			if (milisecs > 0)
+			if (milisecs >= 10)
 				Thread.Sleep((int)milisecs);
 
             return 0;
